@@ -1,9 +1,3 @@
-variable "aws_region" {}
-variable "project" {}
-variable "ecr_repository" {}
-variable "image_tag" {}
-variable "bucket_name" {}
-
 module "ecs_tasks_role" {
   source = "../modules/iam"
 
@@ -26,6 +20,18 @@ module "ecs_events_role" {
 
 data "aws_iam_policy" "ecs_events_role_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+}
+
+module "lambda_role" {
+  source = "../modules/iam"
+
+  name = "lambda"
+  identifier = "lambda.amazonaws.com"
+  policy = data.aws_iam_policy.lambda_role_policy.policy
+}
+
+data "aws_iam_policy" "lambda_role_policy" {
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
 }
 
 module "network" {

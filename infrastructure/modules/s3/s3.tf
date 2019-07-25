@@ -1,5 +1,6 @@
 variable "bucket_name" {}
 variable "ecs_tasks_role_arn" {}
+variable "lambda_role_arn" {}
 
 resource "aws_s3_bucket" "private" {
   bucket = var.bucket_name
@@ -29,7 +30,7 @@ data "aws_iam_policy_document" "private" {
 
     principals {
       type = "AWS"
-      identifiers = [var.ecs_tasks_role_arn]
+      identifiers = [var.ecs_tasks_role_arn, var.lambda_role_arn]
     }
   }
 }
