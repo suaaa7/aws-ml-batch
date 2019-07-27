@@ -23,15 +23,11 @@ data "aws_iam_policy" "ecs_events_role_policy" {
 }
 
 module "lambda_role" {
-  source = "../modules/iam"
+  source = "../modules/iam_for_lambda"
 
   name = "lambda"
   identifier = "lambda.amazonaws.com"
-  policy = data.aws_iam_policy.lambda_role_policy.policy
-}
-
-data "aws_iam_policy" "lambda_role_policy" {
-  arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
 }
 
 module "network" {
@@ -52,6 +48,7 @@ module "s3" {
 
   bucket_name = var.bucket_name
   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
+  lambda_role_arn = module.lambda_role.iam_role_arn
 }
 
 module "ecr" {
@@ -68,7 +65,7 @@ module "fargate" {
   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
   ecs_events_role_arn = module.ecs_events_role.iam_role_arn
   private_subnets = module.network.private_subnets
-  fargate_security_group = module.security.fargate_security_group
+  fargate_security_group = module.security.security_group
   repository_url = module.ecr.repository_url
   image_tag = var.image_tag
 }

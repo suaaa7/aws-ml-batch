@@ -11,7 +11,7 @@ resource "aws_ecr_lifecycle_policy" "ecr" {
 }
 
 data "template_file" "ecr" {
-  template = file("ecr_lifecycle_policy.json")
+  template = file("${path.module}/ecr_lifecycle_policy.json")
 }
 
 output "repository_url" {
