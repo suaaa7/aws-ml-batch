@@ -1,0 +1,10 @@
+{
+  "nameTemplate": "{{.Function.Name}}",
+  "handler": "main.post_to_slack",
+  "hooks": {
+    "build": "pip install -r requirements.txt -t ./site-packages"
+  },
+  "environment": {
+    "PYTHONPATH": "/var/runtime:var/task/site-packages"
+  }
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "fargate",
+    "image": "${repository_url}:${image_tag}",
+    "essential": true,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "${aws_region}",
+        "awslogs-stream-prefix": "batch",
+        "awslogs-group": "${cloudwatch_log_group}"
+      }
+    }
+  }
+]
