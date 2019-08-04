@@ -23,11 +23,16 @@ data "aws_iam_policy" "ecs_events_role_policy" {
 }
 
 module "lambda_role" {
-  source = "../modules/iam_for_lambda"
+  source = "../modules/iam"
 
   name = "lambda"
   identifier = "lambda.amazonaws.com"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
+  #policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
+  policy = data.aws_iam_policy.lambda_role_policy.policy
+}
+
+data "aws_iam_policy" "lambda_role_policy" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
 }
 
 module "network" {
