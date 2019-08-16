@@ -1,17 +1,14 @@
 import boto3
 import datetime
 import json
+import os
 import requests
-from argparse import ArgumentParser
 
-def get_option():
-    argparser = ArgumentParser()
-    argparser.add_argument("-whu", "--webhook_url", type=str,
-                           default="Undefined", help="Webhook URL")
-    argparser.add_argument("-bn", "--bucket_name", type=str,
-                           default="Undefined", help="Bucket Name")
-
-    return argparser.parse_args()
+def get_option_for_lambda():
+    bucket_name = os.environ["BUCKET_NAME"]
+    webhook_url = os.environ["WEBHOOK_URL"]
+ 
+    return bucket_name, webhook_url
 
 def put_json_to_s3(bucket_name):
     s3 = boto3.resource("s3")
@@ -41,12 +38,10 @@ def post_to_slack(whu, text):
 
     requests.post(SLACK_URL.format(whu), json.dumps(json_data))
 
-if __name__ == "__main__" :
-    args = get_option()
+def lambda_handler(event, context):
+    bucket_name, webhook_url = get_option_for_lambda()
 
-    if args.bucket_name != "Undefined":
-        put_json_to_s3(args.bucket_name)
+    put_json_to_s3(bucket_name)
 
     text = "batch finished."
-    if args.webhook_url != "Undefined":
-        post_to_slack(args.webhook_url, text)
+    post_to_slack(webhook_url, text)

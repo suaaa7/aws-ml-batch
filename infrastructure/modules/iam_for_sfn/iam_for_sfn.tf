@@ -11,9 +11,18 @@ data "aws_iam_policy_document" "sfn" {
 
     principals {
       type = "Service"
-      identifiers = ["states.${var.aws_region}.amazonaws.com"]
+      identifiers = [
+        "states.${var.aws_region}.amazonaws.com",
+        "events.amazonaws.com"
+      ]
     }
   }
+}
+
+resource "aws_iam_policy_attachment" "sfn" {
+  name = "AWSLambdaRole"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
+  roles = [aws_iam_role.sfn.name]
 }
 
 resource "aws_iam_role_policy" "sfn" {
