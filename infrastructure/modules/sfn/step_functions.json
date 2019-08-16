@@ -1,0 +1,16 @@
+{
+  "Comment": "Step Functions",
+  "StartAt": "NotifySlack",
+  "States": {
+    "NotifySlack": {
+      "Type": "Task",
+      "Resource": "${lambda_arn}",
+      "Next": "UploadJsonToS3"
+    },
+    "UploadJsonToS3": {
+      "Type": "Task",
+      "Resource": "${lambda_arn}",
+      "End": true
+    }
+  }
+}

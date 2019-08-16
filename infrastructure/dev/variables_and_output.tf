@@ -20,7 +20,10 @@ variable "apex_function_arns" {
 variable "apex_function_names" {
   default = ""
 }
-variable "apex_function_notify_slack" {
+variable "apex_function_notify-slack" {
+  default = ""
+}
+variable "apex_function_notify-slack_name" {
   default = ""
 }
 
