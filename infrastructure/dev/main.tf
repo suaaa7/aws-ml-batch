@@ -1,9 +1,10 @@
+# IAM
 module "ecs_tasks_role" {
   source = "../modules/iam"
 
-  name = "ecs-task-execution"
+  name       = "ecs-task-execution"
   identifier = "ecs-tasks.amazonaws.com"
-  policy = data.aws_iam_policy.ecs_tasks_role_policy.policy
+  policy     = data.aws_iam_policy.ecs_tasks_role_policy.policy
 }
 
 data "aws_iam_policy" "ecs_tasks_role_policy" {
@@ -13,9 +14,9 @@ data "aws_iam_policy" "ecs_tasks_role_policy" {
 module "ecs_events_role" {
   source = "../modules/iam"
 
-  name = "ecs-events"
+  name       = "ecs-events"
   identifier = "events.amazonaws.com"
-  policy = data.aws_iam_policy.ecs_events_role_policy.policy
+  policy     = data.aws_iam_policy.ecs_events_role_policy.policy
 }
 
 data "aws_iam_policy" "ecs_events_role_policy" {
@@ -25,7 +26,7 @@ data "aws_iam_policy" "ecs_events_role_policy" {
 module "lambda_role" {
   source = "../modules/iam"
 
-  name = "lambda"
+  name       = "lambda"
   identifier = "lambda.amazonaws.com"
   #policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
   policy = data.aws_iam_policy.lambda_role_policy.policy
@@ -35,42 +36,72 @@ data "aws_iam_policy" "lambda_role_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
 }
 
-module "network" {
-  source = "../modules/network"
+module "sfn_role" {
+  source = "../modules/iam_for_sfn"
 
-  project = var.project
+  aws_region = var.aws_region
+  name       = "sfn"
 }
 
-module "security" {
-  source = "../modules/security"
+# Network
+# module "network" {
+#   source = "../modules/network"
 
-  project = var.project
-  vpc = module.network.vpc
-}
+#   project = var.project
+# }
 
+# Security
+# module "security" {
+#   source = "../modules/security"
+
+#   project = var.project
+#   vpc = module.network.vpc
+# }
+
+# S3
 module "s3" {
   source = "../modules/s3"
 
-  bucket_name = var.bucket_name
+  bucket_name        = var.bucket_name
   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
-  lambda_role_arn = module.lambda_role.iam_role_arn
+  lambda_role_arn    = module.lambda_role.iam_role_arn
 }
 
+# ECR
 module "ecr" {
   source = "../modules/ecr"
 
   ecr_repository = var.ecr_repository
 }
 
-module "fargate" {
-  source = "../modules/fargate"
+# Fargate
+# module "fargate" {
+#   source = "../modules/fargate"
 
-  aws_region = var.aws_region
-  project = var.project
-  ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
-  ecs_events_role_arn = module.ecs_events_role.iam_role_arn
-  private_subnets = module.network.private_subnets
-  fargate_security_group = module.security.security_group
-  repository_url = module.ecr.repository_url
-  image_tag = var.image_tag
+#   aws_region = var.aws_region
+#   project = var.project
+#   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
+#   ecs_events_role_arn = module.ecs_events_role.iam_role_arn
+#   private_subnets = module.network.private_subnets
+#   fargate_security_group = module.security.security_group
+#   repository_url = module.ecr.repository_url
+#   image_tag = var.image_tag
+# }
+
+# SFN
+module "sfn" {
+  source = "../modules/sfn"
+
+  sfn_role_arn = module.sfn_role.iam_role_arn
+  lambda_arn   = var.apex_function_notify-slack
+  lambda_arn2  = var.apex_function_check-result
+}
+
+# CloudWatch
+module "cloudwatch" {
+  source = "../modules/cloudwatch"
+
+  project      = var.project
+  sfn_role_arn = module.sfn_role.iam_role_arn
+  sfn_arn      = module.sfn.sfn_arn
 }

@@ -1,52 +1,31 @@
-import boto3
 import datetime
 import json
+import os
 import requests
-from argparse import ArgumentParser
 
-def get_option():
-    argparser = ArgumentParser()
-    argparser.add_argument("-whu", "--webhook_url", type=str,
-                           default="Undefined", help="Webhook URL")
-    argparser.add_argument("-bn", "--bucket_name", type=str,
-                           default="Undefined", help="Bucket Name")
-
-    return argparser.parse_args()
-
-def put_json_to_s3(bucket_name):
-    s3 = boto3.resource("s3")
-    bucket = s3.Bucket(bucket_name)
-
-    filename = "test_{0:%Y%m%d-%H%M}.json"
-    pred_result = {
-        "modelname": "base_model", 
-        "accracy": 0.90
-    }
-    json_str = json.dumps(pred_result)
-
-    now = datetime.datetime.now()
-    bucket.put_object(
-        ACL="private",
-        Body=json_str,
-        Key=filename.format(now),
-        ContentType="text/json"
-    )
+def get_option_for_lambda():
+    bucket_name = os.environ["BUCKET_NAME"]
+    webhook_url = os.environ["WEBHOOK_URL"]
+ 
+    return bucket_name, webhook_url
 
 def post_to_slack(whu, text):
     SLACK_URL = "https://hooks.slack.com/services/{}"
 
+    now = datetime.datetime.now()
     json_data = {
         "text": text,
+        "time": "{0:%Y%m%d-%H%M}".format(now),
     }
 
     requests.post(SLACK_URL.format(whu), json.dumps(json_data))
 
-if __name__ == "__main__" :
-    args = get_option()
+def lambda_handler(event, context):
+    bucket_name, webhook_url = get_option_for_lambda()
 
-    if args.bucket_name != "Undefined":
-        put_json_to_s3(args.bucket_name)
+    text = event["text"]
+    post_to_slack(webhook_url, text)
 
-    text = "batch finished."
-    if args.webhook_url != "Undefined":
-        post_to_slack(args.webhook_url, text)
+    return {
+        "result": text
+    }
