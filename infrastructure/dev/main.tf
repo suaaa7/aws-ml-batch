@@ -2,9 +2,9 @@
 module "ecs_tasks_role" {
   source = "../modules/iam"
 
-  name = "ecs-task-execution"
+  name       = "ecs-task-execution"
   identifier = "ecs-tasks.amazonaws.com"
-  policy = data.aws_iam_policy.ecs_tasks_role_policy.policy
+  policy     = data.aws_iam_policy.ecs_tasks_role_policy.policy
 }
 
 data "aws_iam_policy" "ecs_tasks_role_policy" {
@@ -14,9 +14,9 @@ data "aws_iam_policy" "ecs_tasks_role_policy" {
 module "ecs_events_role" {
   source = "../modules/iam"
 
-  name = "ecs-events"
+  name       = "ecs-events"
   identifier = "events.amazonaws.com"
-  policy = data.aws_iam_policy.ecs_events_role_policy.policy
+  policy     = data.aws_iam_policy.ecs_events_role_policy.policy
 }
 
 data "aws_iam_policy" "ecs_events_role_policy" {
@@ -26,7 +26,7 @@ data "aws_iam_policy" "ecs_events_role_policy" {
 module "lambda_role" {
   source = "../modules/iam"
 
-  name = "lambda"
+  name       = "lambda"
   identifier = "lambda.amazonaws.com"
   #policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
   policy = data.aws_iam_policy.lambda_role_policy.policy
@@ -40,6 +40,7 @@ module "sfn_role" {
   source = "../modules/iam_for_sfn"
 
   aws_region = var.aws_region
+  name       = "sfn"
 }
 
 # Network
@@ -61,9 +62,9 @@ module "sfn_role" {
 module "s3" {
   source = "../modules/s3"
 
-  bucket_name = var.bucket_name
+  bucket_name        = var.bucket_name
   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
-  lambda_role_arn = module.lambda_role.iam_role_arn
+  lambda_role_arn    = module.lambda_role.iam_role_arn
 }
 
 # ECR
@@ -92,14 +93,15 @@ module "sfn" {
   source = "../modules/sfn"
 
   sfn_role_arn = module.sfn_role.iam_role_arn
-  lambda_arn = var.apex_function_notify-slack
+  lambda_arn   = var.apex_function_notify-slack
+  lambda_arn2  = var.apex_function_check-result
 }
 
 # CloudWatch
 module "cloudwatch" {
   source = "../modules/cloudwatch"
 
-  project = var.project
+  project      = var.project
   sfn_role_arn = module.sfn_role.iam_role_arn
-  sfn_arn = module.sfn.sfn_arn
+  sfn_arn      = module.sfn.sfn_arn
 }

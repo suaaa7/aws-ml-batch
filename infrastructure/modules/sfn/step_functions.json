@@ -1,15 +1,69 @@
 {
   "Comment": "Step Functions",
-  "StartAt": "NotifySlack",
+  "StartAt": "NotifySlackForStart",
   "States": {
-    "NotifySlack": {
+    "NotifySlackForStart": {
       "Type": "Task",
       "Resource": "${lambda_arn}",
-      "Next": "UploadJsonToS3"
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Parameters": {
+        "text": "Batch started."
+      },
+      "Next": "CheckResult"
     },
-    "UploadJsonToS3": {
+    "CheckResult": {
+      "Type": "Task",
+      "Resource": "${lambda_arn2}",
+      "InputPath": "$",
+      "ResultPath": "$.CheckResult",
+      "OutputPath": "$",
+      "Next": "IsSuccessed"
+    },
+    "IsSuccessed": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.CheckResult.result",
+          "StringEquals": "Successed",
+          "Next": "BatchSuccessed"
+        },
+        {
+          "Variable": "$.CheckResult.result",
+          "StringEquals": "Failed",
+          "Next": "BatchFailed"
+        }
+      ],
+      "Default": "BatchFailed"
+    },
+    "BatchSuccessed": {
       "Type": "Task",
       "Resource": "${lambda_arn}",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Parameters": {
+        "text": "Batch successed."
+      },
+      "Next": "NotifySlackForEnd"
+    },
+    "BatchFailed": {
+      "Type": "Task",
+      "Resource": "${lambda_arn}",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Parameters": {
+        "text": "Batch failed."
+      },
+      "End": true
+    },
+    "NotifySlackForEnd": {
+      "Type": "Task",
+      "Resource": "${lambda_arn}",
+      "InputPath": "$",
+      "OutputPath": "$",
+      "Parameters": {
+        "text": "Batch finished."
+      },
       "End": true
     }
   }

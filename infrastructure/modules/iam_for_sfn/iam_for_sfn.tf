@@ -1,7 +1,8 @@
 variable "aws_region" {}
+variable "name" {}
 
 resource "aws_iam_role" "sfn" {
-  name = "sfn"
+  name               = var.name
   assume_role_policy = data.aws_iam_policy_document.sfn.json
 }
 
@@ -19,15 +20,9 @@ data "aws_iam_policy_document" "sfn" {
   }
 }
 
-resource "aws_iam_policy_attachment" "sfn" {
-  name = "AWSLambdaRole"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
-  roles = [aws_iam_role.sfn.name]
-}
-
 resource "aws_iam_role_policy" "sfn" {
-  name = "sfn"
-  role = aws_iam_role.sfn.id
+  name   = var.name
+  role   = aws_iam_role.sfn.id
   policy = data.aws_iam_policy_document.sfn_for_cloudwatch.json
 }
 

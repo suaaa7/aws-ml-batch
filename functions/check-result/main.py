@@ -33,4 +33,6 @@ def lambda_handler(event, context):
 
     put_json_to_s3(bucket_name)
 
-    return { "Result": "Successed" }
+    return { 
+        "result": "Successed"
+    }

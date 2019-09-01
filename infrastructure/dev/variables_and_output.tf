@@ -26,6 +26,12 @@ variable "apex_function_notify-slack" {
 variable "apex_function_notify-slack_name" {
   default = ""
 }
+variable "apex_function_check-result" {
+  default = ""
+}
+variable "apex_function_check-result_name" {
+  default = ""
+}
 
 # output
 
