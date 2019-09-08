@@ -10,6 +10,27 @@
       "Parameters": {
         "text": "Batch started."
       },
+      "Next": "RunFargateTask"
+    },
+    "RunFargateTask": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${cluster_arn}",
+        "TaskDefinition": "${task_def_arn}",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "Subnets": [
+              "${subnet}"
+            ],
+            "SecurityGroups": [
+              "${security_group}"
+            ],
+            "AssignPublicIp": "DISABLED"
+          }
+        }
+      },
       "Next": "CheckResult"
     },
     "CheckResult": {
