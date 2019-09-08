@@ -16,8 +16,7 @@ module "lambda_role" {
 
   name       = "lambda"
   identifier = "lambda.amazonaws.com"
-  #policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
-  policy = data.aws_iam_policy.lambda_role_policy.policy
+  policy     = data.aws_iam_policy.lambda_role_policy.policy
 }
 
 data "aws_iam_policy" "lambda_role_policy" {
