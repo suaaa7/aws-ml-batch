@@ -1,5 +1,6 @@
 variable "aws_region" {}
 variable "name" {}
+variable "ecs_tasks_role_arn" {}
 
 resource "aws_iam_role" "sfn" {
   name               = var.name
@@ -13,7 +14,7 @@ data "aws_iam_policy_document" "sfn" {
     principals {
       type = "Service"
       identifiers = [
-        "states.${var.aws_region}.amazonaws.com",
+        "states.amazonaws.com",
         "events.amazonaws.com"
       ]
     }
@@ -30,10 +31,22 @@ data "aws_iam_policy_document" "sfn_for_cloudwatch" {
   statement {
     effect = "Allow"
     actions = [
+      "states:*",
       "lambda:InvokeFunction",
-      "states:StartExecution"
+      "ecs:RunTask",
+      "ecs:StopTask",
+      "ecs:DescribeTasks",
+      "events:PutTargets",
+      "events:PutRule",
+      "events:DescribeRule"
     ]
     resources = ["*"]
+  }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["iam:PassRole"]
+    resources = [var.ecs_tasks_role_arn]
   }
 }
 

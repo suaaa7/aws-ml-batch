@@ -47,6 +47,6 @@ if __name__ == "__main__" :
     if args.bucket_name != "Undefined":
         put_json_to_s3(args.bucket_name)
 
-    text = "batch finished."
+    text = "Fargate finished."
     if args.webhook_url != "Undefined":
         post_to_slack(args.webhook_url, text)

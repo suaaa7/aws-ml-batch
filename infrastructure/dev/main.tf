@@ -11,25 +11,12 @@ data "aws_iam_policy" "ecs_tasks_role_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-module "ecs_events_role" {
-  source = "../modules/iam"
-
-  name       = "ecs-events"
-  identifier = "events.amazonaws.com"
-  policy     = data.aws_iam_policy.ecs_events_role_policy.policy
-}
-
-data "aws_iam_policy" "ecs_events_role_policy" {
-  arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
-}
-
 module "lambda_role" {
   source = "../modules/iam"
 
   name       = "lambda"
   identifier = "lambda.amazonaws.com"
-  #policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonLambdaBasicExecutionRole"
-  policy = data.aws_iam_policy.lambda_role_policy.policy
+  policy     = data.aws_iam_policy.lambda_role_policy.policy
 }
 
 data "aws_iam_policy" "lambda_role_policy" {
@@ -39,24 +26,25 @@ data "aws_iam_policy" "lambda_role_policy" {
 module "sfn_role" {
   source = "../modules/iam_for_sfn"
 
-  aws_region = var.aws_region
-  name       = "sfn"
+  aws_region         = var.aws_region
+  name               = "sfn"
+  ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
 }
 
 # Network
-# module "network" {
-#   source = "../modules/network"
+module "network" {
+  source = "../modules/network"
 
-#   project = var.project
-# }
+  project = var.project
+}
 
 # Security
-# module "security" {
-#   source = "../modules/security"
+module "security" {
+  source = "../modules/security"
 
-#   project = var.project
-#   vpc = module.network.vpc
-# }
+  project = var.project
+  vpc     = module.network.vpc
+}
 
 # S3
 module "s3" {
@@ -65,6 +53,7 @@ module "s3" {
   bucket_name        = var.bucket_name
   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
   lambda_role_arn    = module.lambda_role.iam_role_arn
+  sfn_role_arn       = module.sfn_role.iam_role_arn
 }
 
 # ECR
@@ -75,26 +64,28 @@ module "ecr" {
 }
 
 # Fargate
-# module "fargate" {
-#   source = "../modules/fargate"
+module "fargate" {
+  source = "../modules/fargate"
 
-#   aws_region = var.aws_region
-#   project = var.project
-#   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
-#   ecs_events_role_arn = module.ecs_events_role.iam_role_arn
-#   private_subnets = module.network.private_subnets
-#   fargate_security_group = module.security.security_group
-#   repository_url = module.ecr.repository_url
-#   image_tag = var.image_tag
-# }
+  aws_region                        = var.aws_region
+  project                           = var.project
+  ecs_tasks_role_arn                = module.ecs_tasks_role.iam_role_arn
+  repository_url                    = module.ecr.repository_url
+  image_tag                         = var.image_tag
+  cloudwatch_log_group_fargate_name = module.cloudwatch.cloudwatch_log_group_fargate_name
+}
 
 # SFN
 module "sfn" {
   source = "../modules/sfn"
 
-  sfn_role_arn = module.sfn_role.iam_role_arn
-  lambda_arn   = var.apex_function_notify-slack
-  lambda_arn2  = var.apex_function_check-result
+  sfn_role_arn   = module.sfn_role.iam_role_arn
+  lambda_arn     = var.apex_function_notify-slack
+  lambda_arn2    = var.apex_function_check-result
+  cluster_arn    = module.fargate.cluster_arn
+  task_def_arn   = module.fargate.task_def_arn
+  subnet         = module.network.private_subnet
+  security_group = module.security.security_group
 }
 
 # CloudWatch
