@@ -45,12 +45,12 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.CheckResult.result",
+          "Variable": "$.CheckResult.Result",
           "StringEquals": "Successed",
           "Next": "BatchSuccessed"
         },
         {
-          "Variable": "$.CheckResult.result",
+          "Variable": "$.CheckResult.Result",
           "StringEquals": "Failed",
           "Next": "BatchFailed"
         }

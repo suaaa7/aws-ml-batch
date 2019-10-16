@@ -1,4 +1,7 @@
 {
   "nameTemplate": "{{.Function.Name}}",
-  "handler": "main.lambda_handler"
+  "hooks": {
+    "build": "GOOS=linux GOARCH=amd64 go build -o main main.go",
+    "clean": "rm -f main"
+  }
 }
