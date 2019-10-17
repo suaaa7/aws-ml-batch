@@ -3,6 +3,5 @@
   "description": "aws mlbatch",
   "memory": 128,
   "timeout": 15,
-  "defaultEnvironment": "dev",
-  "runtime": "python3.6"
+  "defaultEnvironment": "dev"
 }
