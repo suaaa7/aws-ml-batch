@@ -1,4 +1,3 @@
-variable "aws_region" {}
 variable "name" {}
 variable "ecs_tasks_role_arn" {}
 

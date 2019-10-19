@@ -1,8 +1,7 @@
-variable "aws_region" {}
 variable "project" {}
-variable "ecs_tasks_role_arn" {}
 variable "repository_url" {}
 variable "image_tag" {}
+variable "ecs_tasks_role_arn" {}
 variable "cloudwatch_log_group_fargate_name" {}
 
 # Cluster
@@ -28,7 +27,6 @@ data "template_file" "task_def" {
   vars = {
     repository_url       = var.repository_url
     image_tag            = var.image_tag
-    aws_region           = var.aws_region
     cloudwatch_log_group = var.cloudwatch_log_group_fargate_name
   }
 }
