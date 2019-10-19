@@ -1,3 +1,11 @@
+terraform {
+  required_version = "0.12.6"
+}
+
+provider "aws" {
+  version = "2.23.0"
+}
+
 # IAM
 module "ecs_tasks_role" {
   source = "../modules/iam"
