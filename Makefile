@@ -2,7 +2,7 @@
 .PHONY: push-image
 push-image:
 	apex infra apply -target=module.ecr -auto-approve
-	$(aws ecr get-login --no-include-email)
+	sleep 5
 	docker push \
 		${AWS_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
 
@@ -19,7 +19,6 @@ apply-lambda:
 
 .PHONY: infra-apply
 infra-apply:
-	#apex infra apply -target=module.ecs_tasks_role -target=module.sfn_role -auto-approve
 	apex infra apply -auto-approve
 
 .PHONY: deploy
@@ -44,8 +43,8 @@ destroy: destroy-lambda infra-destroy
 .PHONY: docker-test
 docker-test:
 	cd python-batch && docker build -t test \
-    	--build-arg BUCKET_NAME=Undefined \
-    	--build-arg WEBHOOK_URL=${WEBHOOK_URL} --no-cache .
+		--build-arg WEBHOOK_URL=${WEBHOOK_URL} \
+    	--build-arg BUCKET_NAME=Undefined --no-cache .
 	docker run -it --rm test
 	docker rmi test
 
