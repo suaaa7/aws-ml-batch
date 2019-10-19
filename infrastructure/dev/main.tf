@@ -1,3 +1,12 @@
+terraform {
+  required_version = "0.12.6"
+}
+
+provider "aws" {
+  version = "2.23.0"
+  region  = "ap-northeast-1"
+}
+
 # IAM
 module "ecs_tasks_role" {
   source = "../modules/iam"
@@ -26,7 +35,6 @@ data "aws_iam_policy" "lambda_role_policy" {
 module "sfn_role" {
   source = "../modules/iam_for_sfn"
 
-  aws_region         = var.aws_region
   name               = "sfn"
   ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
 }
@@ -67,7 +75,6 @@ module "ecr" {
 module "fargate" {
   source = "../modules/fargate"
 
-  aws_region                        = var.aws_region
   project                           = var.project
   ecs_tasks_role_arn                = module.ecs_tasks_role.iam_role_arn
   repository_url                    = module.ecr.repository_url
