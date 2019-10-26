@@ -1,5 +1,5 @@
 variable "project" {}
-variable "sfn_role_arn" {}
+variable "sfn_events_role_arn" {}
 variable "sfn_arn" {}
 
 # CloudWatch Log
@@ -29,7 +29,7 @@ resource "aws_cloudwatch_event_rule" "sfn" {
 resource "aws_cloudwatch_event_target" "sfn" {
   rule      = aws_cloudwatch_event_rule.sfn.id
   target_id = "sfn"
-  role_arn  = var.sfn_role_arn
+  role_arn  = var.sfn_events_role_arn
   arn       = var.sfn_arn
 }
 
