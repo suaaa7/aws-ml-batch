@@ -7,6 +7,8 @@ provider "aws" {
   region  = "ap-northeast-1"
 }
 
+data "aws_caller_identity" "current" {}
+
 # IAM
 module "ecs_tasks_role" {
   source = "../modules/iam"
@@ -32,11 +34,67 @@ data "aws_iam_policy" "lambda_role_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
 }
 
-module "sfn_role" {
-  source = "../modules/iam_for_sfn"
+module "sfn_events_role" {
+  source = "../modules/iam"
 
-  name               = "sfn"
-  ecs_tasks_role_arn = module.ecs_tasks_role.iam_role_arn
+  name       = "sfn-events"
+  identifier = "events.amazonaws.com"
+  policy     = data.aws_iam_policy_document.sfn_events_policy_doc.json
+}
+
+data "aws_iam_policy_document" "sfn_events_policy_doc" {
+  statement {
+    effect    = "Allow"
+    actions   = ["states:StartExecution"]
+    resources = [module.sfn.sfn_arn]
+  }
+}
+
+module "sfn_role" {
+  source = "../modules/iam"
+
+  name       = "sfn"
+  identifier = "states.amazonaws.com"
+  policy     = data.aws_iam_policy_document.sfn_policy_doc.json
+}
+
+data "aws_iam_policy_document" "sfn_policy_doc" {
+  statement {
+    effect  = "Allow"
+    actions = ["lambda:InvokeFunction"]
+    resources = [
+      var.apex_function_notify-slack,
+      var.apex_function_check-result
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:RunTask",
+      "ecs:StopTask",
+      "ecs:DescribeTasks"
+    ]
+    resources = [module.fargate.task_def_arn]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "events:PutTargets",
+      "events:PutRule",
+      "events:DescribeRule"
+    ]
+    resources = [
+      "arn:aws:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/StepFunctionsGetEventsForECSTaskRule"
+    ]
+  }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["iam:PassRole"]
+    resources = [module.ecs_tasks_role.iam_role_arn]
+  }
 }
 
 # Network
@@ -99,7 +157,7 @@ module "sfn" {
 module "cloudwatch" {
   source = "../modules/cloudwatch"
 
-  project      = var.project
-  sfn_role_arn = module.sfn_role.iam_role_arn
-  sfn_arn      = module.sfn.sfn_arn
+  project             = var.project
+  sfn_events_role_arn = module.sfn_events_role.iam_role_arn
+  sfn_arn             = module.sfn.sfn_arn
 }
