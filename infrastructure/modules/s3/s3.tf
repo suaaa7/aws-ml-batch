@@ -18,8 +18,9 @@ resource "aws_s3_bucket_public_access_block" "private" {
 }
 
 resource "aws_s3_bucket_policy" "private" {
-  bucket = aws_s3_bucket.private.id
-  policy = data.aws_iam_policy_document.private.json
+  depends_on = ["aws_s3_bucket_public_access_block.private"]
+  bucket     = aws_s3_bucket.private.id
+  policy     = data.aws_iam_policy_document.private.json
 }
 
 data "aws_iam_policy_document" "private" {

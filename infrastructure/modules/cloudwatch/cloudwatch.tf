@@ -23,7 +23,7 @@ resource "aws_cloudwatch_log_group" "for_sfn" {
 ### SFN
 resource "aws_cloudwatch_event_rule" "sfn" {
   name                = "every_5_minute"
-  schedule_expression = "cron(*/5 * * * ? *)"
+  schedule_expression = "cron(*/10 * * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "sfn" {

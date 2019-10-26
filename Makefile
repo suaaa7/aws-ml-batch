@@ -33,7 +33,6 @@ destroy-lambda:
 
 .PHONY: infra-destroy
 infra-destroy:
-	apex infra destroy -target=module.cloudwatch -target=module.s3 -auto-approve
 	apex infra destroy -auto-approve
 
 .PHONY: destroy
