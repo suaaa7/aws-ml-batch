@@ -1,4 +1,5 @@
 # variables
+variable "aws_region" {}
 variable "project" {}
 variable "ecr_repository" {}
 variable "image_tag" {}
