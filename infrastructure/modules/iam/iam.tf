@@ -35,3 +35,7 @@ output "iam_role_arn" {
 output "iam_role_name" {
   value = aws_iam_role.default.name
 }
+
+output "policy_attachment_id" {
+  value = aws_iam_role_policy_attachment.default.id
+}
