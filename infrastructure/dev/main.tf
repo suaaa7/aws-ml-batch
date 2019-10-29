@@ -151,6 +151,7 @@ module "sfn" {
   task_def_arn   = module.fargate.task_def_arn
   subnet         = module.network.private_subnet
   security_group = module.security.security_group
+  sfn_p_a_id     = module.sfn_role.policy_attachment_id
 }
 
 # CloudWatch

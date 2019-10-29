@@ -5,12 +5,25 @@ variable "cluster_arn" {}
 variable "task_def_arn" {}
 variable "subnet" {}
 variable "security_group" {}
+variable "sfn_p_a_id" {}
 
 resource "aws_sfn_state_machine" "sfn" {
   name     = "sfn"
   role_arn = var.sfn_role_arn
 
   definition = data.template_file.sfn.rendered
+
+  depends_on = ["null_resource.delay"]
+}
+
+resource "null_resource" "delay" {
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
+
+  triggers = {
+    "before" = var.sfn_p_a_id
+  }
 }
 
 data "template_file" "sfn" {
