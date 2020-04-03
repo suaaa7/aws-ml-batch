@@ -5,7 +5,7 @@ ENV WEBHOOK_URL $WEBHOOK_URL
 ARG BUCKET_NAME="Undefined"
 ENV BUCKET_NAME $BUCKET_NAME
 
-ADD script .
+COPY script .
 RUN pip install -r requirements.txt
 
 RUN chmod +x ./entrypoint.sh
